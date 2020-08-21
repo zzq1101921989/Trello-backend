@@ -11,9 +11,11 @@ import {
 } from "koa-ts-controllers"
 import { Context } from "koa";
 import { PostAddBoardBody, PutUpdateBoardBody, getValidateBoard } from "../validators/VerifyBoardBody"
+import authorization from "../middlewares/authorization"
 import { BoardModel } from "../models/BoardModel";
 
 @Controller("/board")
+@Flow([authorization])
 export class BoardController {
 
     /**

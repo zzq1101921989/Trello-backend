@@ -24,6 +24,7 @@ export function IsSameValue(property: string, validationOptions?: ValidationOpti
                     const relatedValue = validationArguments && (validationArguments.object as any)[property]
 
                     // value：是当前装饰器属性对应的值
+                    console.log(relatedValue, value)
                     return relatedValue === value;
                 }
             }
