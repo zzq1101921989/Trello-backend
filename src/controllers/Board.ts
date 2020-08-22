@@ -84,6 +84,9 @@ export class BoardController {
         await board.save();
 
         ctx.status = 204;
+        return {
+            data: "更新成功"
+        }
     };
 
     /**
@@ -100,5 +103,8 @@ export class BoardController {
         await board.destroy();
 
         ctx.status = 204;
+        return {
+            data: "删除成功"
+        }
     }
 }

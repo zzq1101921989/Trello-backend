@@ -4,7 +4,9 @@ import {
     IsNotEmpty,
     ValidateIf,
     IsNumber
-} from "class-validator"
+} from "class-validator";
+import { BoardListModel } from "../models/BoardListModel";
+import Boom from "@hapi/boom";
 
 
 export class GetListQuery {
@@ -45,4 +47,24 @@ export class PutUpdateListBody {
         message: '请输入正确的排序数字'
     })
     order: number
+}
+
+
+/**
+ * @param id 列表id
+ * @param userId 用户id
+ */
+export async function getValidateBoardList (id: number, userId: number): Promise<BoardListModel> {
+
+    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式
+    let boardList = await BoardListModel.findByPk(id);
+
+    if (!boardList) {
+        throw Boom.notFound("当前列表不存在");
+    }
+    if (boardList.userId !== userId) {
+        throw Boom.forbidden("你没有该列表的权限");
+    }
+
+    return boardList;
 }

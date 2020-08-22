@@ -28,8 +28,7 @@ const router = new KoaRouter();
     app.use( async ( ctx: Context, next: Next ) => {
         let token = ctx.headers["authorization"];
         if (token) {
-            // 统一存放到上下文中的 userInfo，但是没有提示，所以需要去types
-            // 目录下面去声明
+            // 统一存放到上下文中的 userInfo，去声明
             ctx.userInfo = jwt.verify(token, configs.jwt.privateKey) as UserInfo;
         };
         await next();

@@ -27,7 +27,7 @@ export class PutUpdateBoardBody {
  */
 export async function getValidateBoard (id: number, userId: number): Promise<BoardModel> {
 
-    // findByPk 返回的是一个表中的一列数据，并且这列数据是对象的形式
+    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式
     let board = await BoardModel.findByPk(id);
 
     if (!board) {
