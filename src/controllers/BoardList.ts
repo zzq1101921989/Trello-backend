@@ -15,6 +15,7 @@ import { GetListQuery, AddBoardList, PutUpdateListBody, getValidateBoardList } f
 import { getValidateBoard } from "../validators/VerifyBoardBody";
 import authorization from "../middlewares/authorization";
 import { BoardListModel } from "../models/BoardListModel";
+import { BoardListCardModel } from "../models/BoardListCardModel"
 
 @Controller("/list")
 @Flow([authorization])
@@ -38,6 +39,8 @@ export class BoardListController {
                 boardId,
                 userId: ctx.userInfo.id
             },
+            // 包含 （联查）
+            include: [BoardListCardModel],
             // 排序
             order: [
                 ['order', 'asc']
@@ -71,15 +74,26 @@ export class BoardListController {
         @Body() body: AddBoardList
     ) {
         let { boardId, name } = body;
+        console.log(boardId);
         // 查询当前登录用户是否存在这个面板，从而确定用户是否拥有在这个面板建立列表的权利
         await getValidateBoard(boardId, ctx.userInfo.id)
         // 实例化一个数据表中的 列数据对象
         let newBoardList = new BoardListModel();
+        // 取出最大order排序中打的那个数值最大的
+        let maxOrderList = await BoardListModel.findOne({
+            where: {
+                boardId,
+            },
+            order: [
+                ['order', 'desc']
+            ]
+        })
+
         // 列数据的各个字段的数据填充
         newBoardList.userId = ctx.userInfo.id;
         newBoardList.boardId = boardId;
         newBoardList.name = name;
-        newBoardList.order = 65535
+        newBoardList.order = maxOrderList ? maxOrderList.order + 65535 : 65535;
         await newBoardList.save();
 
         ctx.status = 201;
@@ -102,11 +116,11 @@ export class BoardListController {
         boardList.boardId = boardId || boardList.boardId;
         boardList.name = name || boardList.name;
         boardList.order = order || boardList.order;
-
-        ctx.status = 204;
-        return {
-            data: "修改成功"
-        };
+        
+        await boardList.save();
+        
+        ctx.status = 201;
+        return boardList;
     };
 
     /**

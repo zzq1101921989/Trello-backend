@@ -21,6 +21,7 @@ export class BoardModel extends Model<BoardModel> {
     @Column
     id: number;
 
+    // 关联 UserModel模型中的主键
     @ForeignKey(() => UserModel)
     @Column({
         type: DataType.INTEGER.UNSIGNED,

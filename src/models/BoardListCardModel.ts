@@ -1,27 +1,28 @@
 import {
     Model,
     Table,
-    DataType,
+    AutoIncrement,
     PrimaryKey,
     Column,
-    AutoIncrement,
-    ForeignKey,
-    HasMany
+    DataType,
+    CreatedAt,
+    UpdatedAt,
+    ForeignKey
 } from "sequelize-typescript";
 import { UserModel } from "./UserModel";
-import { BoardModel } from "./BoardModel"
-import { BoardListCardModel } from "./BoardListCardModel"
+import { BoardListModel } from "./BoardListModel";
 
 @Table({
-    tableName: "BoardList"
+    tableName: "BoardListCard"
 })
-export class BoardListModel extends Model<BoardListModel> {
+export class BoardListCardModel extends Model {
 
     @PrimaryKey
     @AutoIncrement
     @Column
     id: number;
 
+    // 关联 UserModel模型中的主键
     @ForeignKey(() => UserModel)
     @Column({
         type: DataType.INTEGER.UNSIGNED,
@@ -29,13 +30,13 @@ export class BoardListModel extends Model<BoardListModel> {
     })
     userId: number;
 
-    // 关联 BoardModel模型中的主键
-    @ForeignKey(() => BoardModel)
+    // 关联 BoardListModel模型中的主键
+    @ForeignKey(() => BoardListModel)
     @Column({
         type: DataType.INTEGER.UNSIGNED,
         allowNull: false
     })
-    boardId: number;
+    boardListId: number;
 
     @Column({
         type: DataType.STRING(255),
@@ -44,19 +45,22 @@ export class BoardListModel extends Model<BoardListModel> {
     name: string;
 
     @Column({
+        type: DataType.STRING(2000),
+        allowNull: false,
+        defaultValue: ''
+    })
+    description: string;
+
+    @Column({
         type: DataType.FLOAT,
         allowNull: false,
         defaultValue: 0
     })
     order: number;
 
-    // cards 关联 BoardListCardModel模型，并且进行联查
-    @HasMany(() => BoardListCardModel)
-    cards: BoardListCardModel[]
-
-    @Column
+    @CreatedAt
     createdAt: Date;
 
-    @Column
-    updatedAt: Date
-}
+    @UpdatedAt
+    updatedAt: Date;
+} 
