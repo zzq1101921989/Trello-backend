@@ -16,38 +16,104 @@ import { getValidateBoard } from "../validators/VerifyBoardBody";
 import authorization from "../middlewares/authorization";
 import { BoardListModel } from "../models/BoardListModel";
 import { BoardListCardModel } from "../models/BoardListCardModel"
+import { CommentModel } from "../models/CommentModel";
+import { CardAttachmentModel } from "../models/CardAttachmentModel";
+import { AttachmentModel } from "../models/AttachmentModel";
+import config from "../configs/index"
+import { Json } from "sequelize/types/lib/utils";
 
 @Controller("/list")
 @Flow([authorization])
 export class BoardListController {
-    
+
     /**
      * 获取面板中的所有列表集合
      * 地址：/list?boardId=1
      */
     @Get("")
-    public async getAllBoardList (
+    public async getAllBoardList(
         @Ctx() ctx: Context,
         @Query() query: GetListQuery
     ) {
         let { boardId } = query;
         await getValidateBoard(boardId, ctx.userInfo.id)
 
-        let list = BoardListModel.findAll({
+        let list = await BoardListModel.findAll({
             // 条件 ： WHERE boardId = boardId AND userId = 'ctx.userInfo.id'
             where: {
                 boardId,
                 userId: ctx.userInfo.id
             },
             // 包含 （联查）
-            include: [BoardListCardModel],
+            include: [
+                {
+                    model: BoardListCardModel,
+                    include: [
+                        {
+                            model: CommentModel,
+                            attributes: ['id']
+                        },
+                        {
+                            model: CardAttachmentModel,
+                            // model: AttachmentModel,
+                            // attributes: ['id']
+                            include: [
+                                {
+                                    model: AttachmentModel
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
             // 排序
             order: [
                 ['order', 'asc']
             ]
         });
 
-        return list;
+        let boardListCardsData = list.map(( item: any ) => {
+
+            let cards = item.cards.map((card: BoardListCardModel ) => {
+
+                let coverPath = '';
+
+                let attachments = card.attachments.map( attachment => {
+
+                    let data = attachment.toJSON() as CardAttachmentModel & { path: string };
+
+                    data.path = config.storage.prefix + '/' + data.detail.name;
+                    
+                    if (data.isCover) {
+                        coverPath = data.path;
+                    }
+                    
+                    return data;
+                });
+
+                return {
+                    id: card.id,
+                    userId: card.userId,
+                    boardListId: card.boardListId,
+                    name: card.name,
+                    description: card.description,
+                    order: card.order,
+                    createdAt: card.createdAt,
+                    updatedAt: card.updatedAt,
+                    attachments: attachments,
+                    coverPath: coverPath,
+                    commentCount: card.comment.length,
+                };
+            })
+
+            let newCard = JSON.parse(JSON.stringify(item));
+
+            newCard.cards = cards;
+
+            return newCard;
+        })
+
+        return boardListCardsData;
     };
 
     /**
@@ -55,7 +121,7 @@ export class BoardListController {
      * 地址：/list/1
      */
     @Get("/:id(\\d+)")
-    public async getDetailsBoardList (
+    public async getDetailsBoardList(
         @Ctx() ctx: Context,
         @Params("id") id: number
     ) {
@@ -69,7 +135,7 @@ export class BoardListController {
      * body { boardId,  name}
      */
     @Post("")
-    public async addBoardList (
+    public async addBoardList(
         @Ctx() ctx: Context,
         @Body() body: AddBoardList
     ) {
@@ -102,9 +168,11 @@ export class BoardListController {
 
     /**
      * 更新列表
+     * Params: 当前列表的 id
+     * boardId：面板 id
      */
     @Put("/:id(\\d+)")
-    public async updateList (
+    public async updateList(
         @Ctx() ctx: Context,
         @Params('id') id: number,
         @Body() body: PutUpdateListBody
@@ -116,9 +184,9 @@ export class BoardListController {
         boardList.boardId = boardId || boardList.boardId;
         boardList.name = name || boardList.name;
         boardList.order = order || boardList.order;
-        
+
         await boardList.save();
-        
+
         ctx.status = 201;
         return boardList;
     };
@@ -127,7 +195,7 @@ export class BoardListController {
      * 删除列表
      */
     @Delete('/:id(\\d+)')
-    public async deleteBoardList (
+    public async deleteBoardList(
         @Ctx() ctx: Context,
         @Params('id') id: number
     ) {

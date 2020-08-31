@@ -7,11 +7,21 @@ import path from "path";
 import Boom from "@hapi/boom"
 import { Sequelize } from "sequelize-typescript";
 import jwt from "jsonwebtoken";
+import KoaStatic from "koa-static-cache";
+import config from "./configs/index"
 
 const app = new Koa();
 const router = new KoaRouter();
 
 (async () => {
+
+    // 静态资源代理
+    app.use( KoaStatic({
+        dir: config.storage.public,
+        prefix: config.storage.prefix,
+        gzip: true,
+        dynamic: true
+    }) )
 
     const db = new Sequelize({
         ...configs.database,
@@ -78,7 +88,16 @@ const router = new KoaRouter();
         throw Boom.notFound('路由错误');
     });
 
-    app.use(KoaBody());
+    app.use(KoaBody({
+        // 解析二进制
+        multipart: true,
+        formidable: {
+            // 文件上传后存放的目录
+            uploadDir: config.storage.public,
+            // 保存文件后缀名
+            keepExtensions: true
+        }
+    }));
     app.use(router.routes());
 
     app.listen(configs.server.port, configs.server.host, () => {

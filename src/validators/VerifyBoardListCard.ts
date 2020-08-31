@@ -1,6 +1,8 @@
 import { IsNumberString, Min, IsNotEmpty, MaxLength, ValidateIf } from "class-validator";
 import Boom from "@hapi/boom";
-import { BoardListCardModel } from "../models/BoardListCardModel"
+import { BoardListCardModel } from "../models/BoardListCardModel";
+import { CardAttachmentModel } from "../models/CardAttachmentModel"
+import { AttachmentModel } from "../models/AttachmentModel"
 
 export class GetCardsVerify {
     @IsNumberString({}, {
@@ -65,7 +67,7 @@ export class PostUpdateCardVerify {
  */
 export async function getValidateBoardListCard (id: number, userId: number): Promise<BoardListCardModel> {
 
-    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式
+    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式 通过主键来查询一条记录
     let boardListCard = await BoardListCardModel.findByPk(id);
 
     if (!boardListCard) {
@@ -76,5 +78,45 @@ export async function getValidateBoardListCard (id: number, userId: number): Pro
     }
 
     return boardListCard;
+}
+
+/**
+ * 
+ * @param id : 附件关联表 id
+ * @param userId 用户id
+ */
+export async function getValidateCardAttachment (id: number, userId: number): Promise<CardAttachmentModel> {
+
+    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式  通过主键来查询一条记录
+    let cardAttachment = await CardAttachmentModel.findByPk(id);
+
+    if (!cardAttachment) {
+        throw Boom.notFound("当前附件不存在");
+    }
+    if (cardAttachment.userId !== userId) {
+        throw Boom.forbidden("你没有该附件的权限");
+    }
+
+    return cardAttachment;
+}
+
+/**
+ * 
+ * @param id : 附件关联表 id
+ * @param userId 用户id
+ */
+export async function getValidateAttachment (id: number, userId: number): Promise<AttachmentModel> {
+
+    // findByPk 返回的是一个表中的一列数据，并且这列数据是一个实例对象的形式  通过主键来查询一条记录
+    let attachment = await AttachmentModel.findByPk(id);
+
+    if (!attachment) {
+        throw Boom.notFound("当前附件不存在");
+    }
+    if (attachment.userId !== userId) {
+        throw Boom.forbidden("你没有该附件的权限");
+    }
+
+    return attachment;
 }
 

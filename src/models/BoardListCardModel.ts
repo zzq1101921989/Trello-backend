@@ -7,10 +7,14 @@ import {
     DataType,
     CreatedAt,
     UpdatedAt,
-    ForeignKey
+    ForeignKey,
+    HasMany
 } from "sequelize-typescript";
 import { UserModel } from "./UserModel";
 import { BoardListModel } from "./BoardListModel";
+import { CommentModel } from "./CommentModel";
+import { AttachmentModel } from "./AttachmentModel";
+import { CardAttachmentModel } from "./CardAttachmentModel";
 
 @Table({
     tableName: "BoardListCard"
@@ -57,6 +61,16 @@ export class BoardListCardModel extends Model {
         defaultValue: 0
     })
     order: number;
+
+    @HasMany(() => CommentModel)
+    comment: CommentModel[]
+
+    @HasMany(() => CardAttachmentModel)
+    attachments: CardAttachmentModel[]
+
+    // @HasMany(() => AttachmentModel)
+    // attachments: AttachmentModel[]
+
 
     @CreatedAt
     createdAt: Date;

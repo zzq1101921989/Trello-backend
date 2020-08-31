@@ -1,21 +1,23 @@
 import {
-    Model,
     Table,
-    DataType,
+    Model,
     PrimaryKey,
-    Column,
     AutoIncrement,
+    Column,
+    DataType,
     ForeignKey,
-    HasMany
+    BelongsTo,
+    CreatedAt,
+    UpdatedAt,
 } from "sequelize-typescript";
 import { UserModel } from "./UserModel";
-import { BoardModel } from "./BoardModel"
 import { BoardListCardModel } from "./BoardListCardModel"
+import { AttachmentModel } from "./AttachmentModel"
 
 @Table({
-    tableName: "BoardList"
+    tableName: "CardAttachment"
 })
-export class BoardListModel extends Model<BoardListModel> {
+export class CardAttachmentModel extends Model {
 
     @PrimaryKey
     @AutoIncrement
@@ -29,35 +31,33 @@ export class BoardListModel extends Model<BoardListModel> {
     })
     userId: number;
 
-    // 关联 BoardModel模型中的主键
-    @ForeignKey(() => BoardModel)
+    @ForeignKey(() => BoardListCardModel)
     @Column({
         type: DataType.INTEGER.UNSIGNED,
         allowNull: false
     })
-    boardId: number;
+    boardListCardId: number;
 
+    @ForeignKey(() => AttachmentModel)
     @Column({
-        type: DataType.STRING(255),
+        type: DataType.INTEGER.UNSIGNED,
         allowNull: false
     })
-    name: string;
+    attachmentId: number;
 
     @Column({
-        type: DataType.FLOAT,
+        type: DataType.BOOLEAN,
         allowNull: false,
         defaultValue: 0
     })
-    order: number;
+    isCover: boolean;
 
-    // cards 关联 BoardListCardModel模型，并且进行联查
-    // HasMany : 在当前的面板中可以有很多的卡片，这就是一对多
-    @HasMany(() => BoardListCardModel)
-    cards: BoardListCardModel[]
+    @BelongsTo(() => AttachmentModel)
+    detail: AttachmentModel;
 
-    @Column
+    @CreatedAt
     createdAt: Date;
 
-    @Column
-    updatedAt: Date
+    @UpdatedAt
+    updatedAt: Date;
 }

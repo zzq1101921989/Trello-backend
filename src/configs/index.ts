@@ -1,4 +1,5 @@
 import databaseConfig from './database.json';
+import path from "path"
 
 // 声明一个类型验证
 interface IDatabaseConfig {
@@ -19,6 +20,10 @@ const configs = {
         database: databaseConfig.development as IDatabaseConfig,
         jwt: {
             privateKey: "zzq"
+        },
+        storage: {
+            public: path.resolve( __dirname, "../attachments"),
+            prefix: '/public/attachments'
         }
     },
     test: {
@@ -29,6 +34,10 @@ const configs = {
         database: databaseConfig.test as IDatabaseConfig,
         jwt: {
             privateKey: "zzq"
+        },
+        storage: {
+            public: path.resolve( __dirname, "../attachments"),
+            prefix: '/public/attachments'
         }
     },
     env: {
@@ -39,6 +48,10 @@ const configs = {
         database: databaseConfig.production as IDatabaseConfig,
         jwt: {
             privateKey: "zzq"
+        },
+        storage: {
+            public: path.resolve( __dirname, "../attachments"),
+            prefix: '/public/attachments'
         }
     }
 }

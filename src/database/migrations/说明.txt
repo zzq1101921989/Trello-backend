@@ -6,6 +6,8 @@ migrations：和git版本记录差不多的性质，也是用来方便记录和�
       UserAddUpdatedAt 是自己定义的名字。最好语义化一点
 
       db:migrate：执行一次迁移版本中up的操作
+
+      db:seed:all: 执行种子文件
       
       db:migrate:undo：执行一次迁移版本中的down 操作
 
